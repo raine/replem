@@ -1,0 +1,22 @@
+{
+  "name": "replem",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Raine Virta <raine.virta@gmail.com>",
+  "license": "ISC",
+  "bin": {
+    "replem": "./bin/replem"
+  },
+  "dependencies": {
+    "camelcase": "^1.2.1",
+    "minimist": "^1.2.0",
+    "ramda": "^0.17.1",
+    "xtend": "^4.0.0"
+  },
+  "devDependencies": {
+    "babel": "^5.8.23"
+  }
+}
