@@ -6,6 +6,7 @@ const { map, split, pipe, apply, fromPairs, reverse, values, mapObj, toPairs, jo
 const extend = require('xtend/mutable');
 const chalk = require('chalk');
 const camelCase = require('camelcase');
+const spinner = require('char-spinner');
 
 const prefix = path.join(process.env.HOME, '.replem');
 const noop   = () => {};
@@ -62,7 +63,9 @@ const smartCase = ifElse(isCapitalized, pascalCase, camelCase);
 const context = mapKeys(smartCase, parseContextFromArgv(argv._));
 const packages = values(context);
 
+const interval = spinner();
 installMultiple(packages, () => {
+  clearInterval(interval);
   console.log(`Installed into REPL context:\n${formatInstalledStr(context)}`);
   const r = repl.start({ prompt: '> ' });
   extend(r.context, mapObj(require, context));
