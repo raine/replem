@@ -13,7 +13,7 @@ $ npm install -g replem
 ## usage
 
 ```sh
-$ replem [pkg]...
+replem [pkg]...
 ```
 
 By postfixing module's name with `:<alias>` you can set an alias for a
