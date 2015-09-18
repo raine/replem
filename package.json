@@ -1,7 +1,7 @@
 {
   "name": "replem",
   "version": "1.0.0",
-  "description": "",
+  "description": "Instantly try npm modules in REPL environment",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +11,7 @@
   "bin": {
     "replem": "./bin/replem"
   },
+  "keywords": ["repl"],
   "dependencies": {
     "camelcase": "^1.2.1",
     "chalk": "^1.1.1",
