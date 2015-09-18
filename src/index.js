@@ -28,7 +28,7 @@ const installMultiple = (packages, cb) => {
     console.log = noop;
     npm.commands.install(packages, (err) => {
       console.log = log;
-      if (err) die(err);
+      if (err) die(err.message || err);
       cb();
     });
   });
