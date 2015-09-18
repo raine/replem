@@ -16,6 +16,9 @@ $ npm install -g replem
 replem [<pkg>[@<version>[:<alias>]]]...
 ```
 
+Launches a REPL session with specified packages installed and available in
+the context.
+
 By postfixing module's name with `:<alias>` you can set an alias for a
 module.
 
