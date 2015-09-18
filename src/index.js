@@ -14,7 +14,7 @@ const prefix = path.join(process.env.HOME, '.replem');
 const noop   = () => {};
 const log    = console.log;
 
-process.env.NODE_PATH = prefix;
+process.env.NODE_PATH = path.join(prefix, 'node_modules');
 require('module').Module._initPaths();
 
 const die = (err) => {
@@ -27,8 +27,8 @@ const installMultiple = (packages, cb) => {
     if (err) die(err);
     console.log = noop;
     npm.commands.install(packages, (err) => {
-      if (err) die(err);
       console.log = log;
+      if (err) die(err);
       cb();
     });
   });
