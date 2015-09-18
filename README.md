@@ -12,7 +12,7 @@ $ npm install -g replem
 
 ## usage
 
-```sh
+```
 replem [<pkg>[@<version>[:<alias>]]]...
 ```
 
