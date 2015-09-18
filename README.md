@@ -2,7 +2,7 @@
 
 Instantly try npm modules in REPL environment.
 
-![](https://raw.githubusercontent.com/raine/replem/media/term.png)
+<img src="https://raw.githubusercontent.com/raine/replem/media/term.png" width="426" height="189">
 
 ## install
 
