@@ -18,3 +18,7 @@ replem [pkg]...
 
 By postfixing module's name with `:<alias>` you can set an alias for a
 module.
+
+## notes
+
+- Run with node v4.x for properly working tab autocompletion.
