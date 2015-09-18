@@ -1,12 +1,14 @@
 const npm  = require('npm');
 const path = require('path');
 const repl = require('repl');
-const argv = require('minimist')(process.argv.slice(2));
-const { map, split, pipe, apply, fromPairs, reverse, values, mapObj, toPairs, join, concat, adjust, curry, head, ifElse } = require('ramda');
+const { map, split, pipe, apply, fromPairs, reverse, values, mapObj, toPairs, join, concat, adjust, curry, head, ifElse, isEmpty } = require('ramda');
 const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
 const spinner = require('char-spinner');
+const argv = require('minimist')(process.argv.slice(2), {
+  alias: { h: 'help' }
+});
 
 const prefix = path.join(process.env.HOME, '.replem');
 const noop   = () => {};
@@ -69,6 +71,12 @@ const smartCase = ifElse(isCapitalized, pascalCase, camelCase);
 
 const context = mapKeys(smartCase, parseContextFromArgv(argv._));
 const packages = values(context);
+
+const help = `Usage: replem [pkg]...\n
+Example: replem ramda:R lodash\n
+Version: ${require('../package.json').version}`;
+
+if (argv.help || isEmpty(packages)) die(help);
 
 const interval = spinner();
 installMultiple(packages, () => {
