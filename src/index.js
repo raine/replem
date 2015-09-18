@@ -6,6 +6,7 @@ const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
 const spinner = require('char-spinner');
+const replHistory = require('repl.history');
 const argv = require('minimist')(process.argv.slice(2), {
   alias: { h: 'help' }
 });
@@ -83,5 +84,6 @@ installMultiple(packages, () => {
   clearInterval(interval);
   console.log(`Installed into REPL context:\n${formatInstalledList(context)}`);
   const r = repl.start({ prompt: '> ' });
+  replHistory(r, path.join(process.env.HOME , '.replem', 'history'));
   extend(r.context, mapObj(require, context));
 });
