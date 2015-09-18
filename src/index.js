@@ -4,7 +4,7 @@ const repl = require('repl');
 const argv = require('minimist')(process.argv.slice(2));
 const { map, split, pipe, apply, fromPairs, reverse, values, mapObj, toPairs, join, concat, adjust, curry, head, ifElse } = require('ramda');
 const extend = require('xtend/mutable');
-const chalk = require('chalk');
+const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
 const spinner = require('char-spinner');
 
@@ -40,12 +40,19 @@ const parseContextFromArgv = pipe(
   fromPairs
 );
 
-const formatInstalledStr = pipe(
+const readPkgVersion = (pkg) =>
+  require(`${pkg}/package.json`).version;
+
+const unwords = join(' ');
+const formatInstalledList = pipe(
   toPairs,
   map(pipe(
     ([alias, pkg]) =>
-      chalk.green(alias) +
-        chalk.cyan(alias !== pkg ? ` (${pkg})` : ''),
+      unwords([
+        cyan(`${pkg}@${readPkgVersion(pkg)}`),
+        'as',
+        green(alias)
+      ]),
     concat(' - ')
   )),
   join('\n')
@@ -66,7 +73,7 @@ const packages = values(context);
 const interval = spinner();
 installMultiple(packages, () => {
   clearInterval(interval);
-  console.log(`Installed into REPL context:\n${formatInstalledStr(context)}`);
+  console.log(`Installed into REPL context:\n${formatInstalledList(context)}`);
   const r = repl.start({ prompt: '> ' });
   extend(r.context, mapObj(require, context));
 });
