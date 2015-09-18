@@ -1,22 +1,24 @@
 const npm  = require('npm');
 const path = require('path');
 const repl = require('repl');
-const { map, split, pipe, apply, fromPairs, reverse, values, mapObj, toPairs, join, concat, adjust, curry, head, ifElse, isEmpty } = require('ramda');
+const { map, pipe, join, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN } = require('ramda');
 const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
 const spinner = require('char-spinner');
 const replHistory = require('repl.history');
+const npa = require('npm-package-arg');
+const S = require('sanctuary');
 const argv = require('minimist')(process.argv.slice(2), {
   alias: { h: 'help' }
 });
 
-const prefix = path.join(process.env.HOME, '.replem');
-const noop   = () => {};
-const log    = console.log;
-
-process.env.NODE_PATH = path.join(prefix, 'node_modules');
-require('module').Module._initPaths();
+const join2 = curryN(2, path.join);
+const prefix = join2(process.env.HOME, '.replem');
+const prefixModules = join2(prefix, 'node_modules');
+const _require = pipe( join2(prefixModules), require );
+const noop = () => {};
+const log = console.log;
 
 const die = (err) => {
   console.error(err);
@@ -35,34 +37,21 @@ const installMultiple = (packages, cb) => {
   });
 };
 
-const parseContextFromArgv = pipe(
-  map(pipe(
-    split(':'),
-    reverse,
-    apply((a, b) => [a, b || a]))),
-  fromPairs
-);
-
-const readPkgVersion = (pkg) =>
-  require(`${pkg}/package.json`).version;
+const readPkgVersion = (name) =>
+  _require(join2(name, 'package.json')).version;
 
 const unwords = join(' ');
 const formatInstalledList = pipe(
-  toPairs,
   map(pipe(
-    ([alias, pkg]) =>
+    ({alias, name}) =>
       unwords([
-        cyan(`${pkg}@${readPkgVersion(pkg)}`),
+        cyan(`${name}@${readPkgVersion(name)}`),
         'as',
         green(alias)
       ]),
-    concat(' - ')
-  )),
+    concat(' - '))),
   join('\n')
 );
-
-const mapKeys = curry((fn, obj) =>
-  fromPairs(map(adjust(fn, 0), toPairs(obj))));
 
 const capitalize = (str) => str[0].toUpperCase() + str.slice(1);
 const pascalCase = pipe(camelCase, capitalize);
@@ -70,11 +59,31 @@ const isUpper = (c) => c.toUpperCase() === c;
 const isCapitalized = pipe(head, isUpper);
 const smartCase = ifElse(isCapitalized, pascalCase, camelCase);
 
-const context = mapKeys(smartCase, parseContextFromArgv(argv._));
-const packages = values(context);
+const ALIAS = /:(.+)$/;
+const rmAlias = replace(ALIAS, '');
+const parseAlias = pipe(
+  S.match(ALIAS),
+  chain(nth(1))
+);
 
-const help = `Usage: replem [pkg]...\n
-Example: replem ramda:R lodash\n
+const orEmpty = S.fromMaybe({});
+const parseArg = (arg) => {
+  const { raw, name } = npa(rmAlias(arg));
+  return mergeAll([
+    { alias: smartCase(name) }, // default
+    orEmpty(map(createMapEntry('alias'), parseAlias(arg))),
+    { raw, name }
+  ]);
+};
+
+const parsed = map(parseArg, argv._);
+const packages = pluck('raw', parsed);
+const contextForPkg = (obj) => {
+  return { [obj.alias]: _require(obj.name) }; };
+const makeContext = pipe(map(contextForPkg), mergeAll);
+
+const help = `Usage: replem [<pkg>[@<version>[:<alias>]]]...\n
+Example: replem ramda:R lodash@3.0.0\n
 Version: ${require('../package.json').version}`;
 
 if (argv.help || isEmpty(packages)) die(help);
@@ -82,8 +91,8 @@ if (argv.help || isEmpty(packages)) die(help);
 const interval = spinner();
 installMultiple(packages, () => {
   clearInterval(interval);
-  console.log(`Installed into REPL context:\n${formatInstalledList(context)}`);
+  console.log(`Installed into REPL context:\n${formatInstalledList(parsed)}`);
   const r = repl.start({ prompt: '> ' });
   replHistory(r, path.join(process.env.HOME , '.replem', 'history'));
-  extend(r.context, mapObj(require, context));
+  extend(r.context, makeContext(parsed));
 });

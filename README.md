@@ -13,12 +13,16 @@ $ npm install -g replem
 ## usage
 
 ```sh
-replem [pkg]...
+replem [<pkg>[@<version>[:<alias>]]]...
 ```
 
 By postfixing module's name with `:<alias>` you can set an alias for a
 module.
 
+A specific version can be installed by providing the version with syntax
+`@<version>` after module name.
+
 ## notes
 
 - Run with node v4.x for properly working tab autocompletion.
+- Multiple versions of the same module cannot be used concurrently.
