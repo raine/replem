@@ -1,4 +1,4 @@
-# repl'em
+# repl'em [![npm version](https://badge.fury.io/js/replem.svg)](https://www.npmjs.com/package/replem)
 
 Instantly try npm modules in REPL environment.
 
