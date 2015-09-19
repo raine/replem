@@ -25,7 +25,7 @@ const die = (err) => {
 };
 
 const installMultiple = (packages, cb) => {
-  npm.load({ prefix, spin: false }, (err) => {
+  npm.load({ prefix, spin: false, loglevel: 'silent' }, (err) => {
     if (err) die(err);
     console.log = noop;
     npm.commands.install(packages, (err) => {
