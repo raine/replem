@@ -1,6 +1,6 @@
 const npm  = require('npm');
 const path = require('path');
-const { map, pipe, join, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN } = require('ramda');
+const { map, pipe, join, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN, toUpper, tail } = require('ramda');
 const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
@@ -52,7 +52,7 @@ const formatInstalledList = pipe(
   join('\n')
 );
 
-const capitalize = (str) => str[0].toUpperCase() + str.slice(1);
+const capitalize = (str) => concat(toUpper(head(str)), tail(str));
 const pascalCase = pipe(camelCase, capitalize);
 const isUpper = (c) => c.toUpperCase() === c;
 const isCapitalized = pipe(head, isUpper);
