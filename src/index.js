@@ -18,11 +18,24 @@ const prefixModules = join2(prefix, 'node_modules');
 const _require = pipe( join2(prefixModules), require );
 const noop = () => {};
 const log = console.log;
-
 const die = (err) => {
   console.error(err);
   process.exit(1);
 };
+
+const help = dedent(`
+  Usage: replem [options] [<pkg>[@<version>[:<alias>]]]...
+
+        --repl  require a custom repl
+    -h, --help  displays help
+
+  Examples:
+
+    replem ramda:R lodash@3.0.0
+    replem --repl coffee-script/repl lodash
+
+  Version: ${require('../package.json').version}
+`);
 
 const installMultiple = (packages, cb) => {
   npm.load({ prefix, spin: false, loglevel: 'silent' }, (err) => {
@@ -76,8 +89,6 @@ const parseArg = (arg) => {
   ]);
 };
 
-const parsed = map(parseArg, argv._);
-const packages = pluck('raw', parsed);
 const contextForPkg = (obj) => {
   const module = _require(obj.name);
   return merge(
@@ -86,20 +97,8 @@ const contextForPkg = (obj) => {
 };
 const makeContext = pipe(map(contextForPkg), mergeAll);
 
-const help = dedent(`
-  Usage: replem [options] [<pkg>[@<version>[:<alias>]]]...
-
-        --repl  require a custom repl
-    -h, --help  displays help
-
-  Examples:
-
-    replem ramda:R lodash@3.0.0
-    replem --repl coffee-script/repl lodash
-
-  Version: ${require('../package.json').version}
-`);
-
+const parsed = map(parseArg, argv._);
+const packages = pluck('raw', parsed);
 if (argv.help || isEmpty(packages)) die(help);
 
 const interval = spinner();
