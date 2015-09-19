@@ -22,11 +22,20 @@ replem [options] [<pkg>[@<version>[:<alias>]]]...
 Launches a REPL session with specified packages installed and available in
 the context.
 
-By postfixing module's name with `:<alias>` you can set an alias for a
-module.
-
 A specific version can be installed by providing the version with syntax
 `@<version>` after module name.
+
+By postfixing module's name with `:<alias>` you can set an alias for a
+module. With a bang (`!`) after everything, all module's properties will be
+directly available in context:
+
+```sh
+$ replem ramda!
+Installed into REPL context:
+ - ramda@0.17.1 as ramda
+> reduce === ramda.reduce
+true
+```
 
 ## custom repl
 
@@ -39,7 +48,7 @@ $ replem --repl coffee-script/repl lodash
 Array [ 0, 2, 4, 6, 8, 10 ]
 ```
 
-## notes
+## caveats
 
 - Run with node v4.x for properly working tab autocompletion.
 - Multiple versions of the same module cannot be used concurrently.
