@@ -13,7 +13,10 @@ $ npm install -g replem
 ## usage
 
 ```
-replem [<pkg>[@<version>[:<alias>]]]...
+replem [options] [<pkg>[@<version>[:<alias>]]]...
+
+        --repl  require a custom repl
+    -h, --help  displays help
 ```
 
 Launches a REPL session with specified packages installed and available in
@@ -29,3 +32,9 @@ A specific version can be installed by providing the version with syntax
 
 - Run with node v4.x for properly working tab autocompletion.
 - Multiple versions of the same module cannot be used concurrently.
+- To use a custom repl, install it to `~/.replem/node_modules` first:
+
+    ```
+    npm install --prefix ~/.replem coffee-script
+    replem --repl coffee-script/repl ramda
+    ```
