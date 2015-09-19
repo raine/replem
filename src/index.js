@@ -1,6 +1,6 @@
 const npm  = require('npm');
 const path = require('path');
-const { map, pipe, join, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN, toUpper, tail } = require('ramda');
+const { map, pipe, join, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN, toUpper, tail, T, __, merge } = require('ramda');
 const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
@@ -58,19 +58,20 @@ const isUpper = (c) => c.toUpperCase() === c;
 const isCapitalized = pipe(head, isUpper);
 const smartCase = ifElse(isCapitalized, pascalCase, camelCase);
 
-const ALIAS = /:(.+)$/;
-const rmAlias = replace(ALIAS, '');
+const ALIAS  = /:([^!]+)/;
+const EXTEND = /!$/;
 const parseAlias = pipe(
-  S.match(ALIAS),
-  chain(nth(1))
-);
-
+  S.match(ALIAS), chain(nth(1)));
+const parseExtend = pipe(
+  S.match(EXTEND), map(T));
+const rm = replace(__, '');
 const orEmpty = S.fromMaybe({});
 const parseArg = (arg) => {
-  const { raw, name } = npa(rmAlias(arg));
+  const { raw, name } = npa(rm(EXTEND, rm(ALIAS, arg)));
   return mergeAll([
     { alias: smartCase(name) }, // default
-    orEmpty(map(createMapEntry('alias'), parseAlias(arg))),
+    orEmpty(map(createMapEntry('alias'),  parseAlias(arg))),
+    orEmpty(map(createMapEntry('extend'), parseExtend(arg))),
     { raw, name }
   ]);
 };
@@ -78,7 +79,11 @@ const parseArg = (arg) => {
 const parsed = map(parseArg, argv._);
 const packages = pluck('raw', parsed);
 const contextForPkg = (obj) => {
-  return { [obj.alias]: _require(obj.name) }; };
+  const module = _require(obj.name);
+  return merge(
+    obj.extend ? module : {},
+    { [obj.alias]: module });
+};
 const makeContext = pipe(map(contextForPkg), mergeAll);
 
 const help = dedent(`
