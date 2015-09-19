@@ -30,6 +30,12 @@
   "devDependencies": {
     "babel": "^5.8.23",
     "babel-eslint": "^4.1.3",
+    "babel-plugin-dedent": "^1.1.0",
     "eslint": "^1.4.3"
+  },
+  "babel": {
+    "plugins": [
+      "dedent"
+    ]
   }
 }

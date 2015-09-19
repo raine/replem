@@ -13,6 +13,8 @@ rules:
     - always
   no-console:
     - 0
+globals:
+  dedent: false
 env:
   es6: true
   node: true

@@ -1,6 +1,5 @@
 const npm  = require('npm');
 const path = require('path');
-const repl = require('repl');
 const { map, pipe, join, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN } = require('ramda');
 const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
@@ -82,9 +81,19 @@ const contextForPkg = (obj) => {
   return { [obj.alias]: _require(obj.name) }; };
 const makeContext = pipe(map(contextForPkg), mergeAll);
 
-const help = `Usage: replem [<pkg>[@<version>[:<alias>]]]...\n
-Example: replem ramda:R lodash@3.0.0\n
-Version: ${require('../package.json').version}`;
+const help = dedent(`
+  Usage: replem [options] [<pkg>[@<version>[:<alias>]]]...
+
+        --repl  require a custom repl
+    -h, --help  displays help
+
+  Examples:
+
+    replem ramda:R lodash@3.0.0
+    replem --repl coffee-script/repl lodash
+
+  Version: ${require('../package.json').version}
+`);
 
 if (argv.help || isEmpty(packages)) die(help);
 
@@ -92,7 +101,8 @@ const interval = spinner();
 installMultiple(packages, () => {
   clearInterval(interval);
   console.log(`Installed into REPL context:\n${formatInstalledList(parsed)}`);
+  const repl = argv.repl ? _require(argv.repl) : require('repl');
   const r = repl.start({ prompt: '> ' });
-  replHistory(r, path.join(process.env.HOME , '.replem', 'history'));
+  replHistory(r, join2(prefix, 'history'));
   extend(r.context, makeContext(parsed));
 });
