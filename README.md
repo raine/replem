@@ -13,7 +13,7 @@ $ npm install -g replem
 ## usage
 
 ```
-replem [options] [<pkg>[@<version>[:<alias>]]]...
+replem [options] [<pkg>[:<alias>]]...
 
         --repl  require a custom repl
     -h, --help  displays help
@@ -22,11 +22,27 @@ replem [options] [<pkg>[@<version>[:<alias>]]]...
 Launches a REPL session with specified packages installed and available in
 the context.
 
-A specific version can be installed by providing the version with syntax
-`@<version>` after module name.
+## arguments
+
+Uses [`npm install`](https://docs.npmjs.com/cli/install) internally, so
+similar types of arguments are accepted.
+
+For example:
+
+- Install a specific version by providing the version as `@<version>` after module name.
+- A module can be installed from GitHub: `githubname/reponame#commit`
 
 By postfixing module's name with `:<alias>` you can set an alias for a
-module. With a bang (`!`) after everything, all module's properties will be
+module. Module's exports will be available under this name.
+
+```sh
+$ replem ramda:R
+Installed into REPL context:
+ - ramda@0.17.1 as R
+> R.inc(1) // 2
+```
+
+With a bang (`!`) after everything, all module's properties will be
 directly available in context:
 
 ```sh
