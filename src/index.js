@@ -1,4 +1,4 @@
-const npm  = require('npm');
+const npm = require('npm');
 const path = require('path');
 const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
@@ -12,6 +12,7 @@ const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
 const { map, pipe, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN, toUpper, tail, T, __, merge, propEq, split, last, curry, commute, unary, project, invoker, find, evolve, join, take } = require('ramda');
+const help = require('./help');
 
 const join2 = curryN(2, path.join);
 const prefix = join2(process.env.HOME, '.replem');
@@ -25,22 +26,6 @@ const die = (err) => {
   console.error(err.message || err);
   process.exit(1);
 };
-
-const help = dedent(`
-  Usage: replem [options] [<pkg>[@<version>[:<alias>]]]...
-
-        --repl  require a custom repl
-    -h, --help  displays help
-
-  Examples:
-
-    replem ramda:R lodash@3.0.0
-    replem ecto/node-timeago
-
-  Version: ${require('../package.json').version}
-
-  README: https://github.com/raine/replem
-`);
 
 const installMultiple = (packages, cb) => {
   npm.load({ prefix, spin: false, loglevel: 'silent' }, (err) => {
