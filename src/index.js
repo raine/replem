@@ -35,9 +35,11 @@ const help = dedent(`
   Examples:
 
     replem ramda:R lodash@3.0.0
-    replem --repl coffee-script/repl lodash
+    replem ecto/node-timeago
 
   Version: ${require('../package.json').version}
+
+  README: https://github.com/raine/replem
 `);
 
 const installMultiple = (packages, cb) => {
