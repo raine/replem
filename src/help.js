@@ -1,5 +1,5 @@
 module.exports = dedent(`
-  Usage: replem [options] [<pkg>[@<version>[:<alias>]]]...
+  Usage: replem [options] [<pkg>[:<alias>]]...
 
         --repl  require a custom repl
     -h, --help  displays help
