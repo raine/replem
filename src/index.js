@@ -1,5 +1,4 @@
-const npm = require('npm');
-const path = require('path');
+const joinPath = require('path').join;
 const extend = require('xtend/mutable');
 const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
@@ -11,32 +10,16 @@ const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { map, pipe, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN, toUpper, tail, T, __, merge, propEq, split, last, curry, commute, unary, project, invoker, find, evolve, join, take } = require('ramda');
+const { map, pipe, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN, toUpper, tail, T, __, merge, split, last, curry, commute, unary, project, invoker, find, evolve, join, take, propEq } = require('ramda');
 const help = require('./help');
+const npm = require('./npm');
 
-const join2 = curryN(2, path.join);
-const prefix = join2(process.env.HOME, '.replem');
-const prefixModules = join2(prefix, 'node_modules');
-const _require = pipe( join2(prefixModules), require );
+const join2 = curryN(2, joinPath);
 const unlines = join('\n');
 const unwords = join(' ');
-const noop = () => {};
-const log = console.log;
 const die = (err) => {
   console.error(err.message || err);
   process.exit(1);
-};
-
-const installMultiple = (packages, cb) => {
-  npm.load({ prefix, spin: false, loglevel: 'silent' }, (err) => {
-    if (err) die(err);
-    console.log = noop;
-    npm.commands.install(packages, (err) => {
-      console.log = log;
-      if (err) die(err.message || err);
-      cb();
-    });
-  });
 };
 
 const getResolvedSha = pipe( split('#'), last, take(7) );
@@ -82,13 +65,16 @@ const parseArg = (arg) => {
   ]);
 };
 
-const contextForPkg = (obj) => {
+const contextForPkg = curry((_require, obj) => {
   const module = _require(obj.name);
   return merge(
     obj.extend ? module : {},
-    { [obj.alias]: module });
-};
-const makeReplContext = pipe(map(contextForPkg), mergeAll);
+    { [obj.alias]: module }
+  );
+});
+
+const makeReplContext = (_require, pkgData) =>
+  mergeAll( map(contextForPkg(_require), pkgData) );
 
 //    glob :: String -> Future Error [String]
 const glob = (path) => Future((rej, res) =>
@@ -101,11 +87,11 @@ const readFile = curry((encoding, filename) =>
       e ? rej(e) : res(data))));
 
 //    traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
-const traverse = (fn) => pipe(map(fn), commute(Future.of))
+const traverse = (fn) => pipe(map(fn), commute(Future.of));
 
 //    readDeps :: String -> [Object]
 const readDeps = pipe(
-  (p) => path.join(p, 'node_modules', '*', 'package.json'),
+  (p) => joinPath(p, '*', 'package.json'),
   glob,
   chain(traverse(readFile('utf8'))),
   map(map(unary(JSON.parse)))
@@ -115,45 +101,53 @@ const readDeps = pipe(
 const startsWith = invoker(1, 'startsWith');
 
 //    mergePkgData :: String -> [Object] -> [Object]
-const mergePkgData = (prefix, parsedArgs) =>
-  readDeps(prefix)
+const mergePkgData = (modulesPath, pkgObjs) =>
+  readDeps(modulesPath)
     .map(project(['_from', '_resolved', 'name', 'version']))
     // _from in package.json is "ramda@*" when install string is "ramda"
     .map(map(evolve({ _from: replace(/@\*$/, '') })))
     .map(data =>
       map(arg =>
         merge(arg, find(propEq('_from', arg.raw), data))
-      , parsedArgs));
+      , pkgObjs));
 
 const defaultAliasToName = (pkg) =>
   merge({ alias: pkgNameAsVar(pkg.name) }, pkg);
 
-const main = (process) => {
-  const argv = minimist(process.argv.slice(2), {
+const parseArgv = (argv) =>
+  minimist(argv.slice(2), {
     alias: { h: 'help' }
   });
 
-  const parsedArgs = map(parseArg, argv._);
-  const raws = pluck('raw', parsedArgs);
-  if (argv.help || isEmpty(raws)) die(help);
+const main = (process) => {
+  const replemPath = join2(process.env.HOME, '.replem');
+  const replemModules = join2(replemPath, 'node_modules');
+  const replemRequire = pipe(join2, require)(replemModules);
+  const argv = parseArgv(process.argv);
+  const pkgObjs = map(parseArg, argv._);
+  const rawPkgNames = pluck('raw', pkgObjs);
 
+  if (argv.help || isEmpty(rawPkgNames)) die(help);
   const interval = spinner();
-  installMultiple(raws, () => {
-    clearInterval(interval);
 
-    mergePkgData(prefix, parsedArgs)
-      .map(map(defaultAliasToName))
-      .fork(die, (pkgData) => {
-        console.log(unlines([
-          'Installed into REPL context:',
-          formatInstalledList(pkgData)
-        ]));
-        const repl = argv.repl ? _require(argv.repl) : require('repl');
-        const r = repl.start({ prompt: '> ' });
-        replHistory(r, join2(prefix, 'history'));
-        extend(r.context, makeReplContext(pkgData));
-      });
-  });
+  npm.load(replemPath)
+    .chain(() => npm.install(rawPkgNames))
+    .chain(() => {
+      clearInterval(interval);
+      return mergePkgData(replemModules, pkgObjs);
+    })
+    .map(map(defaultAliasToName))
+    .fork(die, (pkgData) => {
+      console.log(unlines([
+        'Installed into REPL context:',
+        formatInstalledList(pkgData)
+      ]));
+
+      const repl = argv.repl ? replemRequire(argv.repl) : require('repl');
+      const r = repl.start({ prompt: '> ' });
+      extend(r.context, makeReplContext(replemRequire, pkgData));
+      replHistory(r, join2(replemPath, 'history'));
+    });
 };
 
 main(process);
