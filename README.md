@@ -29,8 +29,8 @@ similar types of arguments are accepted.
 
 For example:
 
-- Install a specific version by providing the version as `@<version>` after module name.
-- A module can be installed from GitHub: `githubname/reponame#commit`
+- Install a specific version: `replem lodash@3.0.0`
+- Install a module from GitHub: `replem githubname/reponame#commit`
 
 By postfixing module's name with `:<alias>` you can set an alias for a
 module. Module's exports will be available under this name.
@@ -42,8 +42,8 @@ Installed into REPL context:
 > R.inc(1) // 2
 ```
 
-With a bang (`!`) after everything, all module's properties will be
-directly available in context:
+With a bang (`!`) after everything, all module's properties will be directly
+available in context:
 
 ```sh
 $ replem ramda!
