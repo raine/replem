@@ -4,6 +4,12 @@ Instantly try npm modules in REPL environment.
 
 <img src="https://raw.githubusercontent.com/raine/replem/media/term.png" width="346" height="207">
 
+## features
+
+- Install modules from npm or directly from GitHub at particular commit or branch.
+- Use a custom REPL like `coffee-script/repl`.
+- Retains history of past sessions.
+
 ## install
 
 ```sh
