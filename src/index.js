@@ -10,7 +10,7 @@ const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { map, pipe, concat, head, ifElse, isEmpty, nth, chain, replace, createMapEntry, pluck, mergeAll, curryN, toUpper, tail, T, __, merge, split, last, curry, commute, unary, project, invoker, find, evolve, join, take, propEq } = require('ramda');
+const { __, chain, commute, concat, createMapEntry, curry, curryN, evolve, find, head, ifElse, invoker, isEmpty, join, last, map, merge, mergeAll, nth, pipe, pluck, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
 const help = require('./help');
 const npm = require('./npm');
 
