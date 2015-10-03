@@ -10,7 +10,7 @@ const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { __, chain, commute, concat, createMapEntry, curry, curryN, evolve, find, head, ifElse, invoker, isEmpty, join, last, map, merge, mergeAll, nth, of, pipe, pluck, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
+const { __, add, chain, commute, concat, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, invoker, isEmpty, join, last, map, merge, mergeAll, nth, of, pipe, pluck, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
 const help = require('./help');
 const npm = require('./npm');
 
@@ -24,9 +24,11 @@ const die = (err) => {
 
 const getResolvedSha = pipe( split('#'), last, take(7) );
 const formatVersion = (resolved, version) =>
-  startsWith('git://', resolved)
-    ? '#' + getResolvedSha(resolved)
-    : '@' + version;
+  pipe(S.toMaybe,
+       filter(startsWith('git://')),
+       map(getResolvedSha),
+       S.maybe(`@${version}`, add('#'))
+      )(resolved);
 
 const formatInstalledList =
   pipe(map(pipe(
