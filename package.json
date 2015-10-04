@@ -26,7 +26,7 @@
     "ramda": "^0.17.1",
     "ramda-fantasy": "^0.4.0",
     "repl.history": "^0.1.3",
-    "sanctuary": "^0.6.0",
+    "sanctuary": "0.7.x",
     "xtend": "^4.0.0"
   },
   "devDependencies": {
