@@ -70,6 +70,11 @@ $ replem --repl coffee-script/repl lodash
 Array [ 0, 2, 4, 6, 8, 10 ]
 ```
 
+## requiring from inside installed modules
+
+The REPL context is provided with the function `replem.require()` that can be
+used to require from under `~/.replem/node_modules`.
+
 ## caveats
 
 - Run with node v4.x for properly working tab autocompletion.

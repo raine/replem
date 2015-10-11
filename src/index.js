@@ -10,7 +10,7 @@ const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { __, add, chain, commute, concat, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, invoker, isEmpty, join, last, map, merge, mergeAll, nth, of, pipe, pluck, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
+const { __, add, chain, commute, concat, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, invoker, isEmpty, join, last, map, merge, mergeAll, nth, pipe, pluck, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
 const help = require('./help');
 const npm = require('./npm');
 
@@ -76,8 +76,10 @@ const contextForPkg = curry((_require, obj) => {
 });
 
 const makeReplContext = (_require, pkgData) =>
-  mergeAll(concat(map(contextForPkg(_require), pkgData),
-                  of({ require: _require })));
+  mergeAll(concat(map(contextForPkg(_require), pkgData), [
+    { replem: { require: _require,
+                modules: pkgData } }
+  ]));
 
 //    glob :: String -> Future Error [String]
 const glob = (path) => Future((rej, res) =>
