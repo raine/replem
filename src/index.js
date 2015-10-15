@@ -103,7 +103,7 @@ const readDeps = pipe(
 );
 
 //    startsWith :: String -> String -> Boolean
-const startsWith = invoker(1, 'startsWith');
+const startsWith = curry((x, str) => str.indexOf(x) === 0);
 
 //    mergePkgData :: String -> [Object] -> [Object]
 const mergePkgData = (modulesPath, pkgObjs) =>
