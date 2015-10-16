@@ -22,6 +22,9 @@ const die = (err) => {
   process.exit(1);
 };
 
+//    startsWith :: String -> String -> Boolean
+const startsWith = curry((x, str) => str.indexOf(x) === 0);
+
 const getResolvedSha = pipe( split('#'), last, take(7) );
 const formatVersion = (resolved, version) =>
   pipe(S.toMaybe,
@@ -94,7 +97,7 @@ const readFile = curry((encoding, filename) =>
 //    traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
 const traverse = (fn) => pipe(map(fn), commute(Future.of));
 
-//    readDeps :: String -> [Object]
+//    readDeps :: String -> Future Error [Object]
 const readDeps = pipe(
   (p) => joinPath(p, '*', 'package.json'),
   glob,
@@ -102,10 +105,7 @@ const readDeps = pipe(
   map(map(unary(JSON.parse)))
 );
 
-//    startsWith :: String -> String -> Boolean
-const startsWith = curry((x, str) => str.indexOf(x) === 0);
-
-//    mergePkgData :: String -> [Object] -> [Object]
+//    mergePkgData :: String -> [Object] -> Future Error [Object]
 const mergePkgData = (modulesPath, pkgObjs) =>
   readDeps(modulesPath)
     .map(project(['_from', '_resolved', 'name', 'version']))
