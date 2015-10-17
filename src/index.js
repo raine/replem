@@ -169,6 +169,7 @@ const main = (process) => {
       const r = repl.start({ prompt: '> ' });
       extend(r.context, makeReplContext(replemRequire, pkgData));
       replHistory(r, join2(replemPath, 'history'));
+      if (argv.repl === false) r.close();
     });
 };
 
