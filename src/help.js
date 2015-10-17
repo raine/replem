@@ -1,9 +1,9 @@
 module.exports = dedent(`
   Usage: replem [options] [<pkg>[:<alias>]]...
 
-        --repl   require a custom repl
-    -v, verbose  enable verbose output
-    -h, --help   displays help
+        --repl     require a custom repl
+    -v, --verbose  enable verbose output
+    -h, --help     displays help
 
   Examples:
 

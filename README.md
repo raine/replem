@@ -21,9 +21,9 @@ $ npm install -g replem
 ```
 replem [options] [<pkg>[:<alias>]]...
 
-        --repl   require a custom repl
-    -v, verbose  enable verbose output
-    -h, --help   displays help
+        --repl     require a custom repl
+    -v, --verbose  enable verbose output
+    -h, --help     displays help
 ```
 
 Launches a REPL session with specified packages installed and available in
