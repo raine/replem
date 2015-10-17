@@ -135,7 +135,8 @@ const defaultAliasToName = (pkg) =>
 
 const parseArgv = (argv) =>
   minimist(argv.slice(2), {
-    alias: { h: 'help', v: 'verbose' }
+    alias: { h: 'help', v: 'verbose' },
+    boolean: ['help', 'verbose']
   });
 
 const main = (process) => {
