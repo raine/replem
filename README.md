@@ -6,7 +6,8 @@ Instantly try npm modules in REPL environment.
 
 ## features
 
-- Install modules from npm or directly from GitHub at particular commit or branch.
+- Install modules from npm, optionally at specific version.
+- Install modules directly from GitHub at particular commit or branch.
 - Use a custom REPL like `coffee-script/repl`.
 - Retains history of past sessions.
 
