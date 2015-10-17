@@ -19,6 +19,7 @@
     "camelcase": "^1.2.1",
     "chalk": "^1.1.1",
     "char-spinner": "^1.0.1",
+    "debug": "^2.2.0",
     "glob": "^5.0.14",
     "minimist": "^1.2.0",
     "npm": "^2.14.5",

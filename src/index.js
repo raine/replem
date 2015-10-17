@@ -10,10 +10,12 @@ const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { __, add, chain, commute, concat, cond, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, isEmpty, join, last, map, merge, mergeAll, nth, path, pipe, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
+const { __, add, chain, commute, complement, compose, concat, cond, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, intersection, is, isEmpty, join, keys, last, map, merge, mergeAll, nth, partial, path, pickBy, pipe, project, propEq, replace, split, T, tail, take, tap, toUpper, unary } = require('ramda');
 const help = require('./help');
 const npm = require('./npm');
 
+//    overlaps :: [a] -> [a] -> Boolean
+const overlaps = pipe(intersection, complement(isEmpty));
 const join2 = curryN(2, joinPath);
 const unlines = join('\n');
 const unwords = join(' ');
@@ -21,6 +23,11 @@ const die = (err) => {
   console.error(err.message || err);
   process.exit(1);
 };
+
+if (overlaps(['-v', '--verbose'], process.argv))
+  require('debug').enable('replem');
+
+const debug = require('debug')('replem');
 
 //    startsWith :: String -> String -> Boolean
 const startsWith = curry((x, str) => str.indexOf(x) === 0);
@@ -128,7 +135,7 @@ const defaultAliasToName = (pkg) =>
 
 const parseArgv = (argv) =>
   minimist(argv.slice(2), {
-    alias: { h: 'help' }
+    alias: { h: 'help', v: 'verbose' }
   });
 
 const main = (process) => {
@@ -138,6 +145,7 @@ const main = (process) => {
   const argv = parseArgv(process.argv);
   const pkgObjs = map(parseArg, argv._);
   const rawPkgNames = map(path(['npa', 'raw']), pkgObjs);
+  debug('parsed args', pkgObjs);
 
   if (argv.help || isEmpty(rawPkgNames)) die(help);
   const interval = spinner();
@@ -148,6 +156,7 @@ const main = (process) => {
       clearInterval(interval);
       return mergePkgData(replemModules, pkgObjs);
     })
+    .map(tap(partial(debug, 'pkg data')))
     .map(map(defaultAliasToName))
     .fork(die, (pkgData) => {
       console.log(unlines([
