@@ -10,7 +10,7 @@ const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { __, add, chain, commute, concat, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, isEmpty, join, last, map, merge, mergeAll, nth, pipe, pluck, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
+const { __, add, chain, commute, concat, cond, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, isEmpty, join, last, map, merge, mergeAll, nth, path, pipe, project, propEq, replace, split, T, tail, take, toUpper, unary } = require('ramda');
 const help = require('./help');
 const npm = require('./npm');
 
@@ -62,11 +62,10 @@ const orEmpty = S.fromMaybe({});
 
 const parseArg = (arg) => {
   const cleaned = cleanArg(arg);
-  const { raw } = npa(cleaned);
   return mergeAll([
     orEmpty(map(createMapEntry('alias'),  parseAlias(arg))),
     orEmpty(map(createMapEntry('extend'), parseExtend(arg))),
-    { raw }
+    { npa: npa(cleaned) }
   ]);
 };
 
@@ -105,6 +104,14 @@ const readDeps = pipe(
   map(map(unary(JSON.parse)))
 );
 
+const makePkgMatchPred = cond([
+  [ propEq('type', 'range'),
+    (npa) => (pkg) =>
+      pkg._from === npa.raw ||
+      pkg._from === `${npa.name}@${npa.spec}` ],
+  [ T, (npa) => propEq('_from', npa.raw) ]
+]);
+
 //    mergePkgData :: String -> [Object] -> Future Error [Object]
 const mergePkgData = (modulesPath, pkgObjs) =>
   readDeps(modulesPath)
@@ -113,7 +120,7 @@ const mergePkgData = (modulesPath, pkgObjs) =>
     .map(map(evolve({ _from: replace(/@\*$/, '') })))
     .map(data =>
       map(arg =>
-        merge(arg, find(propEq('_from', arg.raw), data))
+        merge(arg, find(makePkgMatchPred(arg.npa), data))
       , pkgObjs));
 
 const defaultAliasToName = (pkg) =>
@@ -130,7 +137,7 @@ const main = (process) => {
   const replemRequire = pipe(join2, require)(replemModules);
   const argv = parseArgv(process.argv);
   const pkgObjs = map(parseArg, argv._);
-  const rawPkgNames = pluck('raw', pkgObjs);
+  const rawPkgNames = map(path(['npa', 'raw']), pkgObjs);
 
   if (argv.help || isEmpty(rawPkgNames)) die(help);
   const interval = spinner();
