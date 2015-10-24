@@ -10,7 +10,7 @@ const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { __, add, chain, commute, complement, compose, concat, cond, createMapEntry, curry, curryN, evolve, filter, find, head, ifElse, intersection, is, isEmpty, join, keys, last, map, merge, mergeAll, nth, partial, path, pickBy, pipe, project, propEq, replace, split, T, tail, take, tap, toUpper, unary } = require('ramda');
+const { __, add, chain, commute, complement, concat, cond, curry, curryN, evolve, filter, find, head, ifElse, intersection, isEmpty, join, last, map, merge, mergeAll, nth, objOf, partial, path, pipe, project, propEq, replace, split, T, tail, take, tap, toUpper, unary } = require('ramda');
 const help = require('./help');
 const npm = require('./npm');
 
@@ -70,8 +70,8 @@ const orEmpty = S.fromMaybe({});
 const parseArg = (arg) => {
   const cleaned = cleanArg(arg);
   return mergeAll([
-    orEmpty(map(createMapEntry('alias'),  parseAlias(arg))),
-    orEmpty(map(createMapEntry('extend'), parseExtend(arg))),
+    orEmpty(map(objOf('alias'),  parseAlias(arg))),
+    orEmpty(map(objOf('extend'), parseExtend(arg))),
     { npa: npa(cleaned) }
   ]);
 };
@@ -142,7 +142,7 @@ const parseArgv = (argv) =>
 const main = (process) => {
   const replemPath = join2(process.env.HOME, '.replem');
   const replemModules = join2(replemPath, 'node_modules');
-  const replemRequire = pipe(join2, require)(replemModules);
+  const replemRequire = pipe(join2(replemModules), require);
   const argv = parseArgv(process.argv);
   const pkgObjs = map(parseArg, argv._);
   const rawPkgNames = map(path(['npa', 'raw']), pkgObjs);
@@ -157,7 +157,7 @@ const main = (process) => {
       clearInterval(interval);
       return mergePkgData(replemModules, pkgObjs);
     })
-    .map(tap(partial(debug, 'pkg data')))
+    .map(tap(partial(debug, ['pkg data'])))
     .map(map(defaultAliasToName))
     .fork(die, (pkgData) => {
       console.log(unlines([
