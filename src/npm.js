@@ -2,12 +2,20 @@ const { Future } = require('ramda-fantasy');
 const npm = require('npm'); 
 const noop = () => {};
 const log = console.log;
+const { merge } = require('ramda')
 
-exports.load = (prefix) =>
-  Future((rej, res) =>
-    npm.load({ prefix, spin: false, loglevel: 'silent' }, (err, data) =>
-      err ? rej(err) : res(data))
-);
+exports.load = (prefix, _opts) => {
+  const opts = merge({
+    prefix,
+    spin: false,
+    loglevel: 'silent'
+  }, _opts);
+
+  return Future((rej, res) =>
+    npm.load(opts, (err, data) =>
+      err ? rej(err) : res(data)
+    ));
+};
 
 exports.install = (packages) =>
   Future((rej, res) => {

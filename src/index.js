@@ -1,24 +1,24 @@
 const joinPath = require('path').join;
+
 const extend = require('xtend/mutable');
-const { green, cyan } = require('chalk');
 const camelCase = require('camelcase');
 const spinner = require('char-spinner');
 const replHistory = require('repl.history');
 const npa = require('npm-package-arg');
 const S = require('sanctuary');
-const minimist = require('minimist');
 const _glob = require('glob');
 const fs = require('fs');
 const { Future } = require('ramda-fantasy');
-const { __, chain, commute, complement, concat, cond, curry, curryN, evolve, filter, find, head, ifElse, intersection, isEmpty, join, last, map, merge, mergeAll, nth, objOf, partial, path, pipe, project, propEq, replace, split, T, tail, take, tap, toUpper, unary } = require('ramda');
+const { __, chain, commute, complement, concat, cond, curry, curryN, evolve, find, head, ifElse, intersection, isEmpty, join, map, merge, mergeAll, nth, objOf, partial, path, pipe, project, propEq, replace, T, tail, tap, toUpper, unary } = require('ramda');
 const help = require('./help');
 const npm = require('./npm');
+const formatInstalledList = require('./format-installed-list');
+const parseArgv = require('./parse-argv');
 
 //    overlaps :: [a] -> [a] -> Boolean
 const overlaps = pipe(intersection, complement(isEmpty));
 const join2 = curryN(2, joinPath);
 const unlines = join('\n');
-const unwords = join(' ');
 const die = (err) => {
   console.error(err.message || err);
   process.exit(1);
@@ -28,28 +28,6 @@ if (overlaps(['-v', '--verbose'], process.argv))
   require('debug').enable('replem');
 
 const debug = require('debug')('replem');
-
-//    startsWith :: String -> String -> Boolean
-const startsWith = curry((x, str) => str.indexOf(x) === 0);
-
-const getResolvedSha = pipe( split('#'), last, take(7) );
-const formatVersion = (resolved, version) =>
-  pipe(S.toMaybe,
-       filter(startsWith('git://')),
-       map(getResolvedSha),
-       S.maybe(`@${version}`, concat('#'))
-      )(resolved);
-
-const formatInstalledList =
-  pipe(map(pipe(
-         ({alias, name, version, _resolved}) =>
-           unwords([
-             cyan(`${name}${formatVersion(_resolved, version)}`),
-             'as',
-             green(alias)
-           ]),
-         concat(' - '))),
-       join('\n'));
 
 const capitalize = (str) => concat(toUpper(head(str)), tail(str));
 const pascalCase = pipe(camelCase, capitalize);
@@ -67,7 +45,7 @@ const rm = replace(__, '');
 const cleanArg = pipe(...map(rm, [ EXTEND, ALIAS ]));
 const orEmpty = S.fromMaybe({});
 
-const parseArg = (arg) => {
+const parsePositionalArg = (arg) => {
   const cleaned = cleanArg(arg);
   return mergeAll([
     orEmpty(map(objOf('alias'),  parseAlias(arg))),
@@ -133,25 +111,19 @@ const mergePkgData = (modulesPath, pkgObjs) =>
 const defaultAliasToName = (pkg) =>
   merge({ alias: pkgNameAsVar(pkg.name) }, pkg);
 
-const parseArgv = (argv) =>
-  minimist(argv.slice(2), {
-    alias: { h: 'help', v: 'verbose' },
-    boolean: ['help', 'verbose']
-  });
-
 const main = (process) => {
   const replemPath = join2(process.env.HOME, '.replem');
   const replemModules = join2(replemPath, 'node_modules');
   const replemRequire = pipe(join2(replemModules), require);
   const argv = parseArgv(process.argv);
-  const pkgObjs = map(parseArg, argv._);
+  const pkgObjs = map(parsePositionalArg, argv._);
   const rawPkgNames = map(path(['npa', 'raw']), pkgObjs);
   debug('parsed args', pkgObjs);
 
   if (argv.help || isEmpty(rawPkgNames)) die(help);
   const interval = spinner();
 
-  npm.load(replemPath)
+  npm.load(replemPath, { loglevel: argv.verbose ? 'verbose' : 'silent' })
     .chain(() => npm.install(rawPkgNames))
     .chain(() => {
       clearInterval(interval);
