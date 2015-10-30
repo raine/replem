@@ -138,7 +138,10 @@ const main = (process) => {
       ]));
 
       const repl = argv.repl ? replemRequire(argv.repl) : require('repl');
-      const r = repl.start({ prompt: '> ' });
+      const r = repl.start({
+        prompt: '> ',
+        useGlobal: true
+      });
       extend(r.context, makeReplContext(replemRequire, pkgData));
       replHistory(r, join2(replemPath, 'history'));
       if (argv.repl === false) r.close();
