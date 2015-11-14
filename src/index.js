@@ -101,8 +101,8 @@ const makePkgMatchPred = cond([
 const mergePkgData = (modulesPath, pkgObjs) =>
   readDeps(modulesPath)
     .map(project(['_from', '_resolved', 'name', 'version']))
-    // _from in package.json is "ramda@*" when install string is "ramda"
-    .map(map(evolve({ _from: replace(/@\*$/, '') })))
+    // _from in package.json is "ramda@latest" when install string is "ramda"
+    .map(map(evolve({ _from: replace(/@.*$/, '') })))
     .map(data =>
       map(arg =>
         merge(arg, find(makePkgMatchPred(arg.npa), data))
