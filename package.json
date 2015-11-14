@@ -1,6 +1,6 @@
 {
   "name": "replem",
-  "version": "1.10.3",
+  "version": "1.10.4",
   "description": "Instantly try npm modules in REPL environment",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
