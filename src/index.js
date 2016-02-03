@@ -93,8 +93,12 @@ const makePkgMatchPred = cond([
   [ propEq('type', 'range'),
     (npa) => (pkg) =>
       pkg._from === npa.raw ||
+      pkg._from === npa.name ||
       pkg._from === `${npa.name}@${npa.spec}` ],
-  [ T, (npa) => propEq('_from', npa.raw) ]
+  [ T,
+    (npa) => (pkg) =>
+      pkg._from === npa.raw ||
+      pkg._from === npa.name ]
 ]);
 
 //    mergePkgData :: String -> [Object] -> Future Error [Object]
