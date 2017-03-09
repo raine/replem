@@ -20,7 +20,6 @@
     "chalk": "^1.1.1",
     "char-spinner": "^1.0.1",
     "debug": "^2.2.0",
-    "dedent-js": "^1.0.1",
     "glob": "^5.0.14",
     "minimist": "^1.2.0",
     "npm": "4.3.0",
