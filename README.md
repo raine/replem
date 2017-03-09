@@ -79,5 +79,4 @@ used to require from under `~/.replem/node_modules`.
 
 ## caveats
 
-- Run with node v4.x for properly working tab autocompletion.
 - Multiple versions of the same module cannot be used concurrently.
